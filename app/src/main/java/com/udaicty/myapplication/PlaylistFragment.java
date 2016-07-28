@@ -1,12 +1,16 @@
 package com.udaicty.myapplication;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.plus.PlusOneButton;
@@ -31,12 +35,21 @@ public class PlaylistFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private int position;
-    private PlusOneButton mPlusOneButton;
+    private ImageView coverPlaylist;
+    Intent intent;
+
+    OnCoverPlaylistListener  mCallback;
+    CardView coverCardView;
+    int id;
 
     public PlaylistFragment() {
         // Required empty public constructor
     }
 
+    // Main activity have to implement it
+    public interface OnCoverPlaylistListener {
+        public void onCoverPhotoSelected(int id);
+    }
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -68,13 +81,29 @@ public class PlaylistFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_playlist, container, false);
+        final View view = inflater.inflate(R.layout.fragment_playlist, container, false);
+        coverCardView = (CardView)view.findViewById(R.id.cardview);
+        coverCardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                id = view.getId();
+                Intent i = new Intent(getActivity(), DetailPlaylist.class);
+                i.putExtra("PLAYLIST_NAME", "Happy!!!");
+                startActivity(i);
+                //mCallback.onCoverPhotoSelected(id);
 
-        //Find the +1 button
-        TextView tv = (TextView) view.findViewById(R.id.tv_id);
-        tv.setText("Page " + position);
-
+            }
+        });
         return view;
+    }
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mCallback = (OnCoverPlaylistListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+        }
     }
 
 }

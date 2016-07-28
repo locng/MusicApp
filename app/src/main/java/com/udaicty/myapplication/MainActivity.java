@@ -1,14 +1,31 @@
 package com.udaicty.myapplication;
 
+import android.app.ActionBar;
+import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.support.annotation.DrawableRes;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.View;
+import android.view.Window;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener, PlaylistFragment.OnCoverPlaylistListener {
+
+    private String TAG = getClass().getSimpleName();
 
     /**
      * Create an activity that does the following things:
@@ -30,19 +47,36 @@ public class MainActivity extends AppCompatActivity {
      * The page widget
      * */
     private ViewPager mViewPager;
+    Intent intent;
     /**
      * The page adapter which provides the pages to view pager widget
      * */
     private PagerAdapter mPagerAdapter;
+    private TabLayout mTabLayout;
+    ActionBar mActionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         setContentView(R.layout.activity_main);
 
-        mViewPager = (ViewPager)findViewById(R.id.pager);
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         mPagerAdapter = new PlaceHolderPagerAdapter(getSupportFragmentManager());
+
+        mViewPager = (ViewPager)findViewById(R.id.pager);
         mViewPager.setAdapter(mPagerAdapter);
+        mTabLayout = (TabLayout)findViewById(R.id.sliding_tabs);
+        mTabLayout.setTabsFromPagerAdapter(mPagerAdapter);
+        mTabLayout.setOnTabSelectedListener(this);
+        getSupportActionBar().setIcon(R.drawable.ic_music);
+        for (int i=0;i < mTabLayout.getTabCount();i++){
+            TabLayout.Tab tab = mTabLayout.getTabAt(i);
+
+            String[] tabDescription = getResources().getStringArray(R.array.tab_lit);
+            tab.setText(tabDescription[i]);
+        }
     }
 
     @Override
@@ -57,16 +91,52 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+        int currentTabSelected = tab.getPosition();
+        Log.d(TAG, "onTabSelected() Tab " + currentTabSelected + "clicked");
+        mViewPager.setCurrentItem(currentTabSelected);
+
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
+        Log.d(TAG, "onTabUnselected()");
+    }
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
+        Log.d(TAG, "onTabReselected()");
+    }
+
+    @Override
+    public void onCoverPhotoSelected(int id) {
+
+        PlaylistFragment playlistFragment =(PlaylistFragment)getSupportFragmentManager().findFragmentById(R.id.playlist_fg);
+        View v = (View)playlistFragment.getView().findViewById(id);
+
+        intent = new Intent(this, DetailPlaylist.class);
+
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(intent);
+            }
+        });
+
+    }
+
     /**
      * Simple pager adapter that represents 4 page object in sequence
      * */
-    private class PlaceHolderPagerAdapter extends FragmentStatePagerAdapter {
+    private class PlaceHolderPagerAdapter extends FragmentPagerAdapter {
         public PlaceHolderPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
-        public Fragment getItem(int position) {
+        public android.support.v4.app.Fragment getItem(int position) {
+            Log.d(TAG,"getItem() "+ position);
                 return PlaylistFragment.newInstance(null, position);
         }
 
